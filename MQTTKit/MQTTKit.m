@@ -162,6 +162,11 @@ static void on_unsubscribe(struct mosquitto *mosq, void *obj, int message_id)
     }
 }
 
+static void on_log(struct mosquitto *mosq, void *obj, int level, const char *str)
+{
+    NSString *logString = [NSString stringWithCString:str encoding:NSUTF8StringEncoding];
+    LogDebug(@"mosquitto log info: %@", logString);
+}
 
 // Initialize is called just before the first object is allocated
 + (void)initialize {
@@ -204,7 +209,8 @@ static void on_unsubscribe(struct mosquitto *mosq, void *obj, int message_id)
         mosquitto_message_callback_set(mosq, on_message);
         mosquitto_subscribe_callback_set(mosq, on_subscribe);
         mosquitto_unsubscribe_callback_set(mosq, on_unsubscribe);
-
+        mosquitto_log_callback_set(mosq, on_log);
+        
         self.queue = dispatch_queue_create(cstrClientId, NULL);
     }
     return self;
